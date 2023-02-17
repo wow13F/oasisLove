@@ -1,0 +1,20 @@
+{
+    "id": "rb-pull-refresh-page",
+    "name": "下拉刷新，下拉加载",
+    "version": "1.0.0",
+    "description": "简单的下拉刷新，上拉加载组件，没有花里胡哨的配置，借鉴vantUI",
+    "keywords": [
+        "H5",
+        "，APP，ios",
+        "，安卓"
+    ],
+    "dcloudext": {
+        "category": [
+            "前端组件",
+            "通用组件"
+        ]
+    },
+    "devDependencies": {
+        "cos-js-sdk-v5": "^1.4.15"
+    }
+}

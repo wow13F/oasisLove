@@ -1,0 +1,1 @@
+<view class="content"><view class="bigImg"></view><block wx:if="{{tyisShow}}"><view class="ty"><image src="../../static/img/ty.png" mode></image><view data-event-opts="{{[['tap',[['next',['$event']]]]]}}" class="aggree" bindtap="__e">同意并继续</view><view class="no">退出</view></view></block></view>

@@ -1,0 +1,8 @@
+{
+  "navigationBarTitleText": "",
+  "enablePullDownRefresh": false,
+  "navigationStyle": "custom",
+  "usingComponents": {
+    "image-cropper": "/components/invinbg-image-cropper/invinbg-image-cropper"
+  }
+}

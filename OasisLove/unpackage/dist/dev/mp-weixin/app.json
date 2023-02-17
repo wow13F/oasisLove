@@ -1,0 +1,24 @@
+{
+    "pages": [
+        "pages/qidong/qidong",
+        "pages/yindao/yindao",
+        "pages/home/home",
+        "pages/login/login",
+        "pages/reguser/reguser",
+        "pages/search/search",
+        "pages/userhome/userhome",
+        "pages/friendRequest/friendRequest",
+        "pages/userDetail/userDetail",
+        "pages/chatroom/chatroom",
+        "pages/footer/footer"
+    ],
+    "subPackages": [],
+    "window": {
+        "navigationBarTextStyle": "black",
+        "navigationBarTitleText": "uni-app",
+        "navigationBarBackgroundColor": "#F8F8F8",
+        "backgroundColor": "#F8F8F8"
+    },
+    "usingComponents": {},
+    "sitemapLocation": "sitemap.json"
+}

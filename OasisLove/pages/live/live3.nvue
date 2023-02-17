@@ -1,0 +1,327 @@
+<template>
+    <view class="container">
+		<view class="videoBackground">
+			<video id="videoA" autoplay="true" controls=false show-fullscreen-btn="false" show-play-btn="false" show-center-play-btn="false"></video>
+			<view class="friendInfo">
+				<image src="../../static/logo.png"></image>
+				<p>小红</p>
+			</view>
+			
+			<view class="btns">
+				<view class="title">{{title}}</view>
+				<view class="close">
+					<image src="../../static/image/guaduan.png"></image>				
+				</view>
+			</view>
+		</view>
+		<!-- <view class="sp2">
+			<video id="videoB" autoplay="false" muted="true"  controls></video>
+		</view> -->
+    </view>
+</template>
+
+<script>
+	import store from '../../store/index.js';//需要引入store
+	import {VideoInitiator,VideoReceiver} from '../../common/js/createRTCConnection.js'
+    export default {
+        data() {
+            return {
+				url:'',				// 推流地址
+				src:'',				// 拉流地址  
+				windowWidth:0,		// 设备宽度
+				windowHeight:0, 	// 设备高度
+				windowWidthPUSH:0,		// 设备宽度
+				windowHeightPUSH:0, 	// 设备高度
+				title:'等待对方接受邀请...',
+				statusBarHeight:0,  //状态栏高度
+				
+				userName:'哒哒哒',	// 用户名,
+				friendId:-1,
+				myid:-1,
+				peerA:null,			// 发起端
+				offer:null,
+				answer:null,
+				streamEmit:null,	// 视频发起者媒体流数据
+				streamOn:null,		// 视频接收者媒体流数据
+				setSDP:Object,   	// 设置会话描述
+				
+			}
+        },
+        onReady() {
+            // 注意：需要在onReady中 或 onLoad 延时
+   //          this.context = uni.createLivePusherContext("livePusher", this);
+			// setTimeout(()=>{
+			// 	this.start() 
+			// 	this.join()
+				
+			// },10)  
+			// this.src = store.state.duifangHuiLiuUrl
+			// //uni.setStorage({ 'storage_key_AA': store.state.duifangHuiLiuUrl });
+			// console.log(this.src) 
+			// console.log(store.state.duifangHuiLiuUrl)
+			
+			
+			// const getNewStream = async () => {
+			//   var stream = new MediaStream()
+			//   let audio_stm = await navigator.mediaDevices.getUserMedia({
+			//     audio: true
+			//   })
+			//   let video_stm = await navigator.mediaDevices.getDisplayMedia({
+			//     video: true
+			//   })
+			//   audio_stm.getAudioTracks().map(row => stream.addTrack(row))
+			//   video_stm.getVideoTracks().map(row => stream.addTrack(row))
+			//   return stream
+			// }
+			
+        },
+		mounted() {
+// 		        const query = uni.createSelectorQuery().in(this);
+// 		                        query.select('#videoA').fields({
+// 	rect:true,   //是否返回节点布局位置信息{left,top,right,bottom}
+// 	size:true,  //是否返回节点尺寸信息{width，height}
+// 	scrollOffset:true //是否返回节点滚动信息{scrollLeft,scrollTop}
+// },function(res){
+// 	console.log(res)
+// 	//res 可以返回第一个参数对象中指定为true的相关信息
+// }).exec();
+				
+		},
+		computed:{
+			duifangHuiLiuUrl(){
+				return store.state.duifangHuiLiuUrl
+				 
+			}
+		},
+		onLoad(option) {
+			// this.getSysteminfo()
+			 this.friendId = option.friendId
+			 this.myid = option.fasongzeid
+			// if(option.HuiLiuUrl){
+			// 	this.src = option.HuiLiuUrl
+			// 	console.log(this.src)  
+			// 	this.userName='哈哈哈'
+			// 	this.title='通话中'
+			// 	this.windowWidthPUSH = this.windowWidthPUSH/3
+			// 	this.windowHeightPUSH = this.windowHeightPUSH/6
+			// }
+			//let t = this.getNewStream()
+			//console.log(t)
+			
+			//this.init()
+			this.getMedia()
+			
+			
+			
+		},
+		
+        methods: {
+			//获取媒体流数据
+		    async getMedia(){			
+				this.streamEmit = await navigator.mediaDevices.getUserMedia({
+					  audio: true,
+					  video: {
+					      width: 1920,
+					      height: 1080
+					    }
+					})
+										
+					// 在 video 标签上播放媒体流
+					let videoElement = document.getElementsByTagName('video')[0]
+					//let videoElement2 = document.getElementsByTagName('video')[1]
+					videoElement.srcObject = this.streamEmit
+					console.log(this.streamEmit)
+					
+					// this.setSDP = VideoInitiator(this.streamEmit,(offer)=>{
+					// 	// 将 发起者 的 offer发送给 peerB（接收端）
+					// 	this.socket.emit('livepush', this.friendId, offer,this.myid)
+					// },(candidate)=>{
+					// 	// 将 event.candidate 发送给 peerB端。
+					// 	this.socket.emit('pushCandidate', this.friendId, candidate,this.myid)
+					// })
+					
+					
+					// 监听peerB(接收端) 发来的 answer
+					this.socket.on('onAnswer',async (data) => {
+						console.log(data)
+						console.log(this.setSDP)
+						//this.setSDP(data.answer)
+						this.setSDP.then(res=>{
+							res(data.answer)
+						})
+					    this.answer = data.answer
+						//console.log(this.answer)
+										
+													
+					
+					})
+			},
+			
+				
+				
+		
+		  // async init(){
+			   
+			   
+			 //   // 创建链接实例 peerA（发起端）
+			 //   this.peerA = new RTCPeerConnection()
+			   
+			 //   //获取媒体流数据
+			 //   const stream = await navigator.mediaDevices.getUserMedia({
+			 //   	  audio: true,
+			 //   	  video: {
+			 //   	      width: 1920,
+			 //   	      height: 1080
+			 //   	    }
+			 //   	})
+				
+				// //console.log(this.$refs.videoA)
+				// //this.src = stream // 在 video 标签上播放媒体流
+				// let videoElement = document.getElementsByTagName('video')[0]
+				// videoElement.srcObject = stream
+				
+				// // 为 peerA（发起端）添加媒体流数据
+			 //   stream.getTracks().forEach(track => {
+			 //   	this.peerA.addTrack(track, stream)
+			 //   })
+			   
+			 //   // 为peerA（发起端）创建 offer
+			 //   this.offer = await this.peerA.createOffer()
+			   
+				// // 将 peerA 的 offer发送给 peerB（接收端）
+			 //   this.socket.emit('livepush', this.friendId, this.offer,this.myid)
+			   
+			 //   // 监听peerB(接收端) 发来的 answer
+			 //   this.socket.on('onAnswer',async (data) => {
+			 //   	console.log(data)
+			 //    this.answer = data.answer
+				// console.log(this.answer)
+				// // 将自己创建的offer 设置为自己的本地描述（SDP）
+				// await this.peerA.setLocalDescription(this.offer)
+				
+				// // 将 peerB 发来的answer 设置为自己的远程描述(SDP)
+				// await this.peerA.setRemoteDescription(this.answer)
+				
+				
+			   
+			 //   	// uni.navigateTo({
+			 //   	// 	url: `../../pages/waitplay/waitplay?offer=${data.offer} &&friendId=${data.friendId} &&fasongzeid=${data.fasongzeid}`
+			 //   	// })
+			   
+			 //   })
+			   
+			 //   // peerA 端 当peerA 端设置了  peerA.setLocalDescription(this.offer) 后 会触发下面这个监听函数
+			 //   this.peerA.onicecandidate = event => {
+			 //     if (event.candidate) {
+				// 	 // 将 event.candidate 发送给 peerB端。
+				// 	this.socket.emit('pushCandidate', this.friendId, event.candidate,this.myid)
+			        
+			 //     }
+			 //   }
+			   
+			 //   // this.peerA.onconnectionstatechange = event => {
+			 //   //   if (this.peerA.connectionState === 'connected') {
+			 //   //     console.log('对等连接成功！')
+			 //   //   }
+			 //   //   if (this.peerA.connectionState === 'disconnected') {
+			 //   //     console.log('连接已断开！')
+			 //   //   }
+			 //   // }
+
+
+		  //  }
+        }
+    }
+</script>
+
+<style lang="less">
+	video::-webkit-media-controls-fullscreen-button {
+	        display: none;
+	    }
+		video::-webkit-media-controls-play-button {
+		        display: none;
+		    }
+		    //进度条
+		    video::-webkit-media-controls-timeline {
+		        display: none;
+		    }
+		    //观看的当前时间
+		    video::-webkit-media-controls-current-time-display{
+		        display: none;            
+		    }
+		    //剩余时间
+		    video::-webkit-media-controls-time-remaining-display {
+		        display: none;            
+		    }
+		    //音量按钮
+		    video::-webkit-media-controls-mute-button {
+		        display: none;            
+		    }
+		    video::-webkit-media-controls-toggle-closed-captions-button {
+		        display: none;            
+		    }
+		    //音量的控制条
+		    video::-webkit-media-controls-volume-slider {
+		        display: none;            
+		    }
+		    //所有控件
+		    video::-webkit-media-controls-enclosure{ 
+		        display: none;
+		    }
+	
+.videoBackground{
+	width: 100vw;
+	height: 100vh;
+	color: #fff;
+	#videoA{
+		width: 100%;
+		height: 100vh;
+		position: absolute;
+		top: 0;
+		left: 0;
+		z-index: 0;
+	}
+	.friendInfo{
+		width: 200rpx;
+		position: absolute;
+		left: 50%;
+		top: 20%;
+		transform: translateX(-50%);
+		
+		image{
+			margin: 0 auto;
+			width: 120rpx;
+			height: 120rpx;
+		}
+		p{
+			margin: 0 auto;
+			margin-top: 8rpx;
+			font-size: 18px;
+		}
+	}
+	.btns{
+		width: 300rpx;
+		position: absolute;
+		left: 50%;
+		bottom: 10%;
+		transform: translateX(-50%);
+		
+		.title{
+			padding-bottom: 100rpx;
+			margin: 0 auto;
+		}
+		.close{
+			width: 100rpx;
+			height: 100rpx;
+			margin: 0 auto;
+			
+			image{
+				width: 100rpx;
+				height: 100rpx;
+				
+			}
+		}
+	}
+}
+ 
+</style>
